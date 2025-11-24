@@ -1,38 +1,29 @@
 /* -----------------------------------------------------------
-   Advent Calendar V7 Interactive Engine
-   Features:
-   - JSON-driven doors
-   - Door animations: slide, hinge, fold, fall
-   - Toy bounce-in reveal
-   - MP4 popup video support
-   - Door-opening sound
-   - Snow overlay with parallax
-   - Background animal micro-movement
-   ----------------------------------------------------------- */
+   Advent Calendar V7 — Main Engine (Clean Version)
+   - Loads background, toys, doors
+   - Uses Door class for animation
+   - Handles clicks, snow, animals, video popup
+----------------------------------------------------------- */
 
 let bg;
 let doors = [];
 let toys = {};
 let doorSound;
-
-// Snow
-let snowLayers = [];
-
-// Animals micro-animation placeholders
-let tAnim = 0;
-
-// Video overlay
 let videoElement = null;
+
+// Snow + animals
+let snowLayers = [];
+let tAnim = 0;
 
 function preload() {
   bg = loadImage("assets/advent-image.png?v=" + Date.now());
 
-  // Load toys
+  // Toys
   toys["star"] = loadImage("assets/toy_star.png");
   toys["bear"] = loadImage("assets/toy_bear.png");
   toys["reindeer"] = loadImage("assets/toy_reindeer.png");
 
-  // Door-opening sound
+  // Door sound
   doorSound = new Audio("assets/open.mp3?v=" + Date.now());
 }
 
@@ -40,194 +31,45 @@ function setup() {
   let c = createCanvas(bg.width, bg.height);
   c.parent("canvas-container");
 
-  // Load door metadata
+  // Load door metadata (positions, payloads, animations)
   loadJSON("assets/advent_doors.json?v=" + Date.now(), (data) => {
-    doors = data.doors;
-    for (let d of doors) {
-      d.state = "closed";
-      d.animFrame = 0;
-      d.toyFrame = 0;
-    }
+    doors = data.doors.map((cfg) => new Door(cfg, toys, doorSound));
   });
 
   initSnow();
 }
 
 function draw() {
+  if (!bg) return;
+
+  // Draw background first
   background(bg);
 
   tAnim += 0.02;
 
+  // Overlays
   drawSnow();
   drawAnimals();
-  drawDoors();
-}
 
-/* -----------------------------------------------------------
-   DOOR DRAW + ANIMATION
------------------------------------------------------------ */
-
-function drawDoors() {
+  // Doors (drawn last, on top)
   for (let d of doors) {
-    let x = d.x * width;
-    let y = d.y * height;
-    let w = d.w * width;
-    let h = d.h * height;
-
-    // Closed (draw placeholder frame)
-    if (d.state === "closed") {
-      noFill();
-      stroke(180, 0, 0);
-      strokeWeight(2);
-      rect(x, y, w, h);
-    }
-
-    // Animating open
-    else if (d.state === "animating") {
-      playDoorAnimation(d, x, y, w, h);
-      d.animFrame++;
-
-      if (d.animFrame > 30) {
-        d.state = "opened";
-        if (!d.payload.startsWith("mp4")) {
-          d.toyFrame = 0;
-        }
-        else {
-          playVideo(d.payload.split(":")[1]);
-        }
-      }
-    }
-
-    // Display Toy Bounce
-    else if (d.state === "opened" && !d.payload.startsWith("mp4")) {
-      drawToyBounce(d, x, y, w, h);
-    }
+    d.update();
+    d.draw();
   }
 }
 
 /* -----------------------------------------------------------
-   CLICK INTERACTIONS
+   Mouse Interaction
 ----------------------------------------------------------- */
 
 function mousePressed() {
   for (let d of doors) {
-    let x = d.x * width;
-    let y = d.y * height;
-    let w = d.w * width;
-    let h = d.h * height;
-
-    if (
-      mouseX >= x &&
-      mouseX <= x + w &&
-      mouseY >= y &&
-      mouseY <= y + h &&
-      d.state === "closed"
-    ) {
-      openDoor(d);
-      break;
+    if (d.state === "closed" && d.isHit(mouseX, mouseY)) {
+      const videoSrc = d.open();
+      if (videoSrc) playVideo(videoSrc);
+      break; // one door at a time
     }
   }
-}
-
-function openDoor(d) {
-  doorSound.currentTime = 0;
-  doorSound.play();
-
-  d.state = "animating";
-  d.animFrame = 0;
-}
-
-/* -----------------------------------------------------------
-   DOOR OPENING ANIMATIONS
------------------------------------------------------------ */
-
-function playDoorAnimation(d, x, y, w, h) {
-  let t = d.animFrame / 30;
-
-  fill(255, 240, 200, 200);
-  noStroke();
-
-  switch (d.animation) {
-    case "slide":
-      drawSlideDoor(t, x, y, w, h);
-      break;
-
-    case "hinge":
-      drawHingeDoor(t, x, y, w, h);
-      break;
-
-    case "fold":
-      drawFoldDoor(t, x, y, w, h);
-      break;
-
-    case "fall":
-      drawFallDoor(t, x, y, w, h);
-      break;
-  }
-}
-
-function drawSlideDoor(t, x, y, w, h) {
-  push();
-  translate(x + w * t, y);
-  rect(0, 0, w, h);
-  pop();
-}
-
-function drawHingeDoor(t, x, y, w, h) {
-  push();
-  translate(x, y);
-  translate(0, 0);
-  rotate(-HALF_PI * t);
-  rect(0, 0, w, h);
-  pop();
-}
-
-function drawFoldDoor(t, x, y, w, h) {
-  push();
-  translate(x, y);
-  scale(1 - t, 1);
-  rect(0, 0, w, h);
-  pop();
-}
-
-function drawFallDoor(t, x, y, w, h) {
-  push();
-  translate(x, y + t * 200);
-  rotate(t * 2);
-  rect(0, 0, w, h);
-  pop();
-}
-
-/* -----------------------------------------------------------
-   TOY BOUNCE POP-OUT
------------------------------------------------------------ */
-
-function drawToyBounce(d, x, y, w, h) {
-  let toyName = d.payload;
-  let img = toys[toyName];
-  if (!img) return;
-
-  let t = d.toyFrame / 30;
-  t = constrain(t, 0, 1);
-
-  // Bounce easing
-  let scaleAmt = easeOutBack(t);
-
-  push();
-  translate(x + w / 2, y + h / 2);
-  scale(scaleAmt);
-  imageMode(CENTER);
-  image(img, 0, 0);
-  pop();
-
-  d.toyFrame++;
-}
-
-// easing function
-function easeOutBack(t) {
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
 }
 
 /* -----------------------------------------------------------
@@ -235,37 +77,40 @@ function easeOutBack(t) {
 ----------------------------------------------------------- */
 
 function playVideo(src) {
-  if (videoElement) videoElement.remove();
+  if (videoElement) {
+    videoElement.remove();
+    videoElement = null;
+  }
 
   const container = document.getElementById("canvas-container");
-
   videoElement = document.createElement("video");
   videoElement.src = src;
   videoElement.autoplay = true;
   videoElement.controls = true;
   videoElement.className = "video-overlay";
-
   container.appendChild(videoElement);
 
   videoElement.onended = () => {
-    videoElement.remove();
-    videoElement = null;
+    if (videoElement) {
+      videoElement.remove();
+      videoElement = null;
+    }
   };
 }
 
 /* -----------------------------------------------------------
-   SNOW PARTICLES
+   SNOW EFFECT
 ----------------------------------------------------------- */
 
 function initSnow() {
   for (let layer = 0; layer < 3; layer++) {
     let particles = [];
-    for (let i = 0; i < 240; i++) { //120 snowflakes
+    for (let i = 0; i < 200; i++) {
       particles.push({
         x: random(width),
         y: random(height),
-        speed: random(0.3, 1.0) * (layer + 1),
-        size: random(2, 6 + layer), //size of snowflakes (1,3 + layer)
+        speed: random(0.4, 1.2) * (layer + 1),
+        size: random(2, 6 + layer),
       });
     }
     snowLayers.push(particles);
@@ -278,7 +123,6 @@ function drawSnow() {
     for (let s of layer) {
       fill(255, 255, 255, 180);
       ellipse(s.x, s.y, s.size);
-
       s.y += s.speed;
       if (s.y > height) {
         s.y = 0;
@@ -289,35 +133,44 @@ function drawSnow() {
 }
 
 /* -----------------------------------------------------------
-   ANIMAL MICRO-ANIMATION
+   ANIMAL MICRO-ANIMATIONS (simple visible markers)
+   These are purely for showing motion; you can tune/remove.
 ----------------------------------------------------------- */
 
 function drawAnimals() {
-  // These are placeholder animations for future custom art anchors.
-  // Adjust positions to match actual animals in your image.
+  noStroke();
 
-  // Penguin bob
+  // Penguin bob (small glowing dot where penguin is)
   push();
-  translate(100, 300 + sin(tAnim) * 3);
+  let py = height * 0.32 + Math.sin(tAnim) * 4;
+  fill(255, 255, 255, 160);
+  ellipse(width * 0.18, py, 18, 18);
   pop();
 
-  // Bunny blink
+  // Bunny blink (short line blink)
   push();
-  let blink = abs(sin(tAnim * 3)) < 0.1;
+  const blink = Math.abs(Math.sin(tAnim * 3)) < 0.12;
   if (blink) {
     stroke(0);
-    line(400, 500, 420, 500);
+    strokeWeight(2);
+    line(width * 0.5 - 10, height * 0.55, width * 0.5 + 10, height * 
+0.55);
   }
   pop();
 
-  // Fox tail swish
+  // Fox tail swish (little orange rectangle swaying)
   push();
-  translate(650, 420);
-  rotate(sin(tAnim * 2) * 0.2);
+  translate(width * 0.75, height * 0.45);
+  rotate(Math.sin(tAnim * 2) * 0.25);
+  fill(255, 140, 0, 160);
+  rect(-4, -20, 8, 40, 4);
   pop();
 
-  // Hedgehog wiggle
+  // Hedgehog wiggle (small brown blob)
   push();
-  translate(820, 700 + sin(tAnim * 2.5) * 2);
+  let hy = height * 0.8 + Math.sin(tAnim * 2.5) * 3;
+  fill(139, 69, 19, 170);
+  ellipse(width * 0.82, hy, 22, 16);
   pop();
 }
+
