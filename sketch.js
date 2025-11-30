@@ -9,7 +9,12 @@ let bg;
 let doors = [];
 let toys = {};
 let doorSound;
+let lockedSound;
 let videoElement = null;
+let doorAccessConfig = {
+  allDoors: false,
+  testDay: null,
+};
 
 // Snow + animals
 let snowLayers = [];
@@ -25,6 +30,7 @@ function preload() {
 
   // Door sound
   doorSound = new Audio("assets/open.mp3?v=" + Date.now());
+  lockedSound = new Audio("assets/locked.mp3?v=" + Date.now());
 }
 
 function setup() {
@@ -33,7 +39,12 @@ function setup() {
 
   // Load door metadata (positions, payloads, animations)
   loadJSON("assets/advent_doors.json?v=" + Date.now(), (data) => {
-    doors = data.doors.map((cfg) => new Door(cfg, toys, doorSound));
+    doorAccessConfig.allDoors = Boolean(data.ALL_DOORS);
+    doorAccessConfig.testDay = Number.isInteger(data.testDay)
+      ? clampDay(data.testDay)
+      : null;
+
+    doors = data.doors.map((cfg) => new Door(cfg, toys, doorSound, lockedSound));
   });
 
   initSnow();
@@ -63,8 +74,14 @@ function draw() {
 ----------------------------------------------------------- */
 
 function mousePressed() {
+  const currentDay = resolveCurrentDay();
   for (let d of doors) {
     if (d.state === "closed" && d.isHit(mouseX, mouseY)) {
+      if (!d.canOpen(currentDay)) {
+        d.triggerLocked();
+        break;
+      }
+
       const videoSrc = d.open();
       if (videoSrc) playVideo(videoSrc, d);
       break; // one door at a time
@@ -99,6 +116,18 @@ function playVideo(src, doorInstance) {
       doorInstance.handleVideoFinished();
     }
   };
+}
+
+function resolveCurrentDay() {
+  if (doorAccessConfig.allDoors) return 31;
+  if (Number.isInteger(doorAccessConfig.testDay)) {
+    return clampDay(doorAccessConfig.testDay);
+  }
+  return new Date().getDate();
+}
+
+function clampDay(day) {
+  return Math.max(1, Math.min(day, 31));
 }
 
 /* -----------------------------------------------------------

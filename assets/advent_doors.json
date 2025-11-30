@@ -1,7 +1,10 @@
 {
   "_meta": {
-    "animationLegend": "slide | hinge | fold | fall | double"
+    "animationLegend": "slide | hinge | fold | fall | double",
+    "doorAccess": "ALL_DOORS=true overrides the calendar; testDay (1-24) forces a specific day when ALL_DOORS=false."
   },
+  "ALL_DOORS": false,
+  "testDay": 5,
   "doors": [
     {
       "id": 1,

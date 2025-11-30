@@ -11,9 +11,11 @@ const DOOR_ANIMATIONS = new Set(["slide", "hinge", "fold", "fall", "double"]);
 const ANIM_STEP = 1 / 30;
 const RESET_DELAY_MS = 10000;
 const FADE_DURATION_MS = 2000;
+const SHAKE_FRAMES = 20;
+const SHAKE_MAGNITUDE = 0.03;
 
 class Door {
-  constructor(cfg, toys, doorSound) {
+  constructor(cfg, toys, doorSound, lockedSound) {
     this.id = cfg.id;
     this.x = cfg.x;   // normalized 0–1
     this.y = cfg.y;
@@ -22,9 +24,11 @@ class Door {
 
     this.payload = cfg.payload;       // "star", "bear", "reindeer" or "mp4:assets/door4_video.mp4"
     this.animation = DOOR_ANIMATIONS.has(cfg.animation) ? cfg.animation : "slide";
+    this.unlockDay = cfg.unlockDay || this.id;
 
     this.toys = toys;
     this.doorSound = doorSound;
+    this.lockedSound = lockedSound;
 
     this.state = "closed";     // "closed" → "opening" → "open" → "closing"
     this.animProgress = 0;     // 0 → 1 for door animation
@@ -32,6 +36,7 @@ class Door {
     this.toyAlpha = 1;
     this.openedAt = null;
     this.fadeStartedAt = null;
+    this.shakeFrames = 0;
   }
 
   // Convenience: convert normalized coords to pixels
@@ -85,6 +90,10 @@ class Door {
         this.resetToyState();
       }
     }
+
+    if (this.shakeFrames > 0) {
+      this.shakeFrames--;
+    }
   }
 
   draw() {
@@ -105,6 +114,10 @@ class Door {
 
   drawClosedPanel() {
     const x = this.px(), y = this.py(), w = this.pw(), h = this.ph();
+    const shakeX = this.getShakeOffset();
+
+    push();
+    translate(shakeX, 0);
 
     const placeBelow = this.animation === "double";
     if (this.animation === "double") {
@@ -116,6 +129,7 @@ class Door {
     }
 
     this.drawDoorNumber(x, y, w, h, placeBelow);
+    pop();
   }
 
   drawOpeningPanel() {
@@ -293,6 +307,26 @@ class Door {
   handleVideoFinished() {
     if (!this.isVideoPayload()) return;
     this.startClosing();
+  }
+
+  canOpen(currentDay) {
+    return currentDay >= this.unlockDay;
+  }
+
+  triggerLocked() {
+    if (this.lockedSound) {
+      this.lockedSound.currentTime = 0;
+      this.lockedSound.play();
+    }
+    this.shakeFrames = SHAKE_FRAMES;
+  }
+
+  getShakeOffset() {
+    if (this.shakeFrames <= 0) return 0;
+    const t = 1 - this.shakeFrames / SHAKE_FRAMES; // 0 → 1
+    const envelope = 1 - t * 0.6;
+    const wave = Math.sin(t * PI * 6);
+    return wave * this.pw() * SHAKE_MAGNITUDE * envelope;
   }
 
   resetToyState() {
