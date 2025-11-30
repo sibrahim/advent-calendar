@@ -1,7 +1,8 @@
 /* -----------------------------------------------------------
    Advent Calendar V7 — Main Engine (Clean Version)
    - Loads background, toys, doors
-   - Uses Door class for animation
+   - Uses Door class for animation + bounce/fade/auto-close
+   - Enforces calendar-gated unlocking (with ALL_DOORS/testDay overrides)
    - Handles clicks, snow, animals, video popup
 ----------------------------------------------------------- */
 
