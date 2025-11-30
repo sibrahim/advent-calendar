@@ -66,7 +66,7 @@ function mousePressed() {
   for (let d of doors) {
     if (d.state === "closed" && d.isHit(mouseX, mouseY)) {
       const videoSrc = d.open();
-      if (videoSrc) playVideo(videoSrc);
+      if (videoSrc) playVideo(videoSrc, d);
       break; // one door at a time
     }
   }
@@ -76,7 +76,7 @@ function mousePressed() {
    MP4 VIDEO POPUP
 ----------------------------------------------------------- */
 
-function playVideo(src) {
+function playVideo(src, doorInstance) {
   if (videoElement) {
     videoElement.remove();
     videoElement = null;
@@ -94,6 +94,9 @@ function playVideo(src) {
     if (videoElement) {
       videoElement.remove();
       videoElement = null;
+    }
+    if (doorInstance && typeof doorInstance.handleVideoFinished === "function") {
+      doorInstance.handleVideoFinished();
     }
   };
 }

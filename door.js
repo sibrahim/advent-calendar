@@ -4,10 +4,13 @@
    - Hit detection
    - Drawing closed door
    - Opening animations: slide, hinge, fold, fall, double
-   - Toy bounce after opening
+   - Toy bounce after opening + timed fade/reset
 ----------------------------------------------------------- */
 
 const DOOR_ANIMATIONS = new Set(["slide", "hinge", "fold", "fall", "double"]);
+const ANIM_STEP = 1 / 30;
+const RESET_DELAY_MS = 10000;
+const FADE_DURATION_MS = 2000;
 
 class Door {
   constructor(cfg, toys, doorSound) {
@@ -23,9 +26,12 @@ class Door {
     this.toys = toys;
     this.doorSound = doorSound;
 
-    this.state = "closed";     // "closed" → "opening" → "open"
+    this.state = "closed";     // "closed" → "opening" → "open" → "closing"
     this.animProgress = 0;     // 0 → 1 for door animation
     this.toyProgress = 0;      // 0 → 1 for toy bounce
+    this.toyAlpha = 1;
+    this.openedAt = null;
+    this.fadeStartedAt = null;
   }
 
   // Convenience: convert normalized coords to pixels
@@ -59,19 +65,24 @@ class Door {
 
   update() {
     if (this.state === "opening") {
-      this.animProgress += 1 / 30;  // ~30 frames of animation
+      this.animProgress += ANIM_STEP;  // ~30 frames of animation
       if (this.animProgress >= 1) {
         this.animProgress = 1;
         this.state = "open";
 
-        if (!this.payload.startsWith("mp4:")) {
-          this.toyProgress = 0;
+        if (!this.isVideoPayload()) {
+          this.resetToyState();
+          this.openedAt = millis();
         }
       }
-    } else if (this.state === "open" && !this.payload.startsWith("mp4:")) {
-      if (this.toyProgress < 1) {
-        this.toyProgress += 1 / 30;
-        if (this.toyProgress > 1) this.toyProgress = 1;
+    } else if (this.state === "open" && !this.isVideoPayload()) {
+      this.advanceToyReveal();
+    } else if (this.state === "closing") {
+      this.animProgress -= ANIM_STEP;
+      if (this.animProgress <= 0) {
+        this.animProgress = 0;
+        this.state = "closed";
+        this.resetToyState();
       }
     }
   }
@@ -79,10 +90,10 @@ class Door {
   draw() {
     if (this.state === "closed") {
       this.drawClosedPanel();
-    } else if (this.state === "opening") {
+    } else if (this.state === "opening" || this.state === "closing") {
       this.drawOpeningPanel();
     } else if (this.state === "open") {
-      if (!this.payload.startsWith("mp4:")) {
+      if (!this.isVideoPayload()) {
         this.drawToyBounce();
       }
     }
@@ -95,6 +106,7 @@ class Door {
   drawClosedPanel() {
     const x = this.px(), y = this.py(), w = this.pw(), h = this.ph();
 
+    const placeBelow = this.animation === "double";
     if (this.animation === "double") {
       const { gap, leafWidth } = this.getDoubleDoorMetrics(w);
       this.drawDoorLeaf(x, y, leafWidth, h, "right");
@@ -102,6 +114,8 @@ class Door {
     } else {
       this.drawDoorLeaf(x, y, w, h, "right");
     }
+
+    this.drawDoorNumber(x, y, w, h, placeBelow);
   }
 
   drawOpeningPanel() {
@@ -190,7 +204,10 @@ class Door {
     translate(cx, cy);
     scale(s);
     imageMode(CENTER);
+    const alpha = constrain(this.toyAlpha, 0, 1) * 255;
+    tint(255, alpha);
     image(img, 0, 0);
+    noTint();
     pop();
   }
 
@@ -224,6 +241,69 @@ class Door {
     const gap = Math.max(2, totalWidth * 0.02);
     const leafWidth = (totalWidth - gap) / 2;
     return { gap, leafWidth };
+  }
+
+  drawDoorNumber(x, y, w, h, placeBelow = false) {
+    push();
+    fill(190, 0, 20);
+    noStroke();
+    textAlign(CENTER, placeBelow ? TOP : CENTER);
+    textStyle(BOLD);
+    textFont("Georgia");
+    const size = Math.min(w, h) * 0.6;
+    textSize(size);
+    const padding = Math.min(w, h) * 0.15;
+    const textY = placeBelow ? y + h + padding : y + h / 2 + size * 0.05;
+    text(this.id, x + w / 2, textY);
+    pop();
+  }
+
+  advanceToyReveal() {
+    if (this.toyProgress < 1) {
+      this.toyProgress += ANIM_STEP;
+      if (this.toyProgress > 1) this.toyProgress = 1;
+    }
+
+    if (this.openedAt === null) {
+      this.openedAt = millis();
+      return;
+    }
+
+    const now = millis();
+    if (!this.fadeStartedAt && now - this.openedAt >= RESET_DELAY_MS) {
+      this.fadeStartedAt = now;
+    }
+
+    if (this.fadeStartedAt) {
+      const elapsed = now - this.fadeStartedAt;
+      const ratio = constrain(elapsed / FADE_DURATION_MS, 0, 1);
+      this.toyAlpha = 1 - ratio;
+      if (this.toyAlpha <= 0) {
+        this.toyAlpha = 0;
+        this.startClosing();
+      }
+    }
+  }
+
+  startClosing() {
+    if (this.state === "closing" || this.state === "closed") return;
+    this.state = "closing";
+  }
+
+  handleVideoFinished() {
+    if (!this.isVideoPayload()) return;
+    this.startClosing();
+  }
+
+  resetToyState() {
+    this.toyProgress = 0;
+    this.toyAlpha = 1;
+    this.openedAt = null;
+    this.fadeStartedAt = null;
+  }
+
+  isVideoPayload() {
+    return this.payload && this.payload.startsWith("mp4:");
   }
 }
 
