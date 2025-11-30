@@ -3,9 +3,11 @@
    Handles:
    - Hit detection
    - Drawing closed door
-   - Opening animations: slide, hinge, fold, fall
+   - Opening animations: slide, hinge, fold, fall, double
    - Toy bounce after opening
 ----------------------------------------------------------- */
+
+const DOOR_ANIMATIONS = new Set(["slide", "hinge", "fold", "fall", "double"]);
 
 class Door {
   constructor(cfg, toys, doorSound) {
@@ -16,7 +18,7 @@ class Door {
     this.h = cfg.h;
 
     this.payload = cfg.payload;       // "star", "bear", "reindeer" or "mp4:assets/door4_video.mp4"
-    this.animation = cfg.animation || "slide";
+    this.animation = DOOR_ANIMATIONS.has(cfg.animation) ? cfg.animation : "slide";
 
     this.toys = toys;
     this.doorSound = doorSound;
@@ -93,71 +95,80 @@ class Door {
   drawClosedPanel() {
     const x = this.px(), y = this.py(), w = this.pw(), h = this.ph();
 
-    push();
-    // Door body
-    fill(200, 150, 80);
-    stroke(120, 80, 40);
-    strokeWeight(2);
-    rect(x, y, w, h, 5);
-
-    // Inner panel
-    noFill();
-    stroke(100, 60, 30);
-    rect(x + 4, y + 4, w - 8, h - 8, 4);
-
-    // Handle
-    stroke(80, 50, 30);
-    strokeWeight(2);
-    line(x + w - 10, y + h / 2 - 5, x + w - 10, y + h / 2 + 5);
-    pop();
+    if (this.animation === "double") {
+      const { gap, leafWidth } = this.getDoubleDoorMetrics(w);
+      this.drawDoorLeaf(x, y, leafWidth, h, "right");
+      this.drawDoorLeaf(x + leafWidth + gap, y, leafWidth, h, "left");
+    } else {
+      this.drawDoorLeaf(x, y, w, h, "right");
+    }
   }
 
   drawOpeningPanel() {
     const t = this.animProgress;   // 0 → 1
     const x = this.px(), y = this.py(), w = this.pw(), h = this.ph();
 
-    push();
-    fill(200, 150, 80);
-    stroke(120, 80, 40);
-    strokeWeight(2);
-
     switch (this.animation) {
       case "slide":
         // Slide to the right
+        push();
         translate(x + w * t, y);
-        rect(0, 0, w, h, 5);
+        this.drawDoorLeaf(0, 0, w, h, "right");
+        pop();
         break;
 
       case "hinge":
         // Swing like a door hinged on the left
+        push();
         translate(x, y);
-        translate(0, 0);
         rotate(-HALF_PI * t); // up to -90 degrees
-        rect(0, 0, w, h, 5);
+        this.drawDoorLeaf(0, 0, w, h, "right");
+        pop();
         break;
 
       case "fold":
         // Fold in on itself (scale X)
+        push();
         translate(x, y);
         scale(1 - t, 1);
-        rect(0, 0, w, h, 5);
+        this.drawDoorLeaf(0, 0, w, h, "right");
+        pop();
         break;
 
       case "fall":
         // Fall down while rotating
+        push();
         translate(x, y + t * 3 * h);
         rotate(t * PI);
-        rect(0, 0, w, h, 5);
+        this.drawDoorLeaf(0, 0, w, h, "right");
+        pop();
         break;
+
+      case "double": {
+        // Split from center: left leaf slides left, right leaf slides right
+        const { gap, leafWidth } = this.getDoubleDoorMetrics(w);
+        const offset = t * (leafWidth + gap + 4);
+
+        push();
+        translate(x - offset, y);
+        this.drawDoorLeaf(0, 0, leafWidth, h, "right");
+        pop();
+
+        push();
+        translate(x + leafWidth + gap + offset, y);
+        this.drawDoorLeaf(0, 0, leafWidth, h, "left");
+        pop();
+        break;
+      }
 
       default:
         // Fallback: slide
+        push();
         translate(x + w * t, y);
-        rect(0, 0, w, h, 5);
+        this.drawDoorLeaf(0, 0, w, h, "right");
+        pop();
         break;
     }
-
-    pop();
   }
 
   /* -----------------------------------------------------------
@@ -187,6 +198,32 @@ class Door {
     const c1 = 1.70158;
     const c3 = c1 + 1;
     return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+
+  drawDoorLeaf(x, y, w, h, handleSide = "right") {
+    push();
+
+    fill(200, 150, 80);
+    stroke(120, 80, 40);
+    strokeWeight(2);
+    rect(x, y, w, h, 5);
+
+    noFill();
+    stroke(100, 60, 30);
+    rect(x + 4, y + 4, w - 8, h - 8, 4);
+
+    const handleX = handleSide === "left" ? x + 10 : x + w - 10;
+    stroke(80, 50, 30);
+    strokeWeight(2);
+    line(handleX, y + h / 2 - 5, handleX, y + h / 2 + 5);
+
+    pop();
+  }
+
+  getDoubleDoorMetrics(totalWidth) {
+    const gap = Math.max(2, totalWidth * 0.02);
+    const leafWidth = (totalWidth - gap) / 2;
+    return { gap, leafWidth };
   }
 }
 
