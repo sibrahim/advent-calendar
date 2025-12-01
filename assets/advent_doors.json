@@ -12,7 +12,7 @@
       "y": 0.15,
       "w": 0.06,
       "h": 0.06,
-      "payload": "bear",
+      "payload": "mp4:assets/door1_putting_up_the_tree.mp4",
       "animation": "slide"
     },
     {
