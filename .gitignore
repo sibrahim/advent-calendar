@@ -1,7 +1,6 @@
 v7/
 tmp/
 assets/tmp/
-*swp
-
+assets/notused/
 .DS_Store
 
