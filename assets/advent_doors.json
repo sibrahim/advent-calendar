@@ -3,8 +3,8 @@
     "animationLegend": "slide | hinge | fold | fall | double",
     "doorAccess": "ALL_DOORS=true overrides the calendar; testDay (1-24) forces a specific day when ALL_DOORS=false."
   },
-  "ALL_DOORS": false,
-  "testDay": 5,
+  "ALL_DOORS": true,
+    "testDay": 10,
   "doors": [
     {
       "id": 1,
@@ -12,7 +12,7 @@
       "y": 0.15,
       "w": 0.06,
       "h": 0.06,
-      "payload": "mp4:assets/door1_putting_up_the_tree.mp4",
+      "payload": "mp4:assets/tree.mp4",
       "animation": "slide"
     },
     {
@@ -21,7 +21,7 @@
       "y": 0.16,
       "w": 0.054,
       "h": 0.06,
-      "payload": "star",
+      "payload": "mp4:assets/elves_making_toys.mp4",
       "animation": "hinge"
     },
     {
