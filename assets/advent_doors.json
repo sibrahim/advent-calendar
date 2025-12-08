@@ -30,7 +30,7 @@
       "y": 0.15,
       "w": 0.06,
       "h": 0.06,
-      "payload": "star",
+      "payload": "assets/toy_duck.png",
       "animation": "fold"
     },
     {
@@ -57,7 +57,7 @@
       "y": 0.31,
       "w": 0.066,
       "h": 0.06,
-      "payload": "bear",
+      "payload": "star",
       "animation": "slide"
     },
     {

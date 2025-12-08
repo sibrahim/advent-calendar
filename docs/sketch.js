@@ -12,6 +12,7 @@ let toys = {};
 let doorSound;
 let lockedSound;
 let videoElement = null;
+let doorConfig = null;
 let doorAccessConfig = {
   allDoors: false,
   testDay: null,
@@ -22,31 +23,42 @@ let snowLayers = [];
 let tAnim = 0;
 
 function preload() {
-  bg = loadImage("assets/advent-image.png?v=" + Date.now());
+  const cacheBust = Date.now();
 
-  // Toys
-  toys["star"] = loadImage("assets/toy_star.png");
-  toys["bear"] = loadImage("assets/toy_bear.png");
-  toys["reindeer"] = loadImage("assets/toy_reindeer.png");
+  // Load door config up front so we can auto-load any toy images it references.
+  doorConfig = loadJSON("assets/advent_doors.json?v=" + cacheBust);
+
+  bg = loadImage("assets/advent-image.png?v=" + cacheBust);
+
+  // Auto-load all non-video payloads referenced by the config.
+  const imagePayloads = collectImagePayloads(doorConfig);
+  imagePayloads.forEach((payload) => {
+    const assetPath = resolveToyImagePath(payload);
+    if (assetPath) {
+      toys[payload] = loadImage(assetPath);
+    }
+  });
 
   // Door sound
-  doorSound = new Audio("assets/open.mp3?v=" + Date.now());
-  lockedSound = new Audio("assets/locked.mp3?v=" + Date.now());
+  doorSound = new Audio("assets/open.mp3?v=" + cacheBust);
+  lockedSound = new Audio("assets/locked.mp3?v=" + cacheBust);
 }
 
 function setup() {
   let c = createCanvas(bg.width, bg.height);
   c.parent("canvas-container");
 
-  // Load door metadata (positions, payloads, animations)
-  loadJSON("assets/advent_doors.json?v=" + Date.now(), (data) => {
-    doorAccessConfig.allDoors = Boolean(data.ALL_DOORS);
-    doorAccessConfig.testDay = Number.isInteger(data.testDay)
-      ? clampDay(data.testDay)
-      : null;
-
-    doors = data.doors.map((cfg) => new Door(cfg, toys, doorSound, lockedSound));
-  });
+  // Use config from preload; if it failed for any reason, fall back to a fetch.
+  if (doorConfig) {
+    ensureToysLoadedFromConfig(doorConfig);
+    hydrateDoorsFromConfig(doorConfig);
+  } else {
+    loadJSON("assets/advent_doors.json?v=" + Date.now(), (data) => {
+      doorConfig = data;
+      ensureToysLoadedFromConfig(data);
+      hydrateDoorsFromConfig(data);
+    });
+  }
 
   initSnow();
 }
@@ -129,6 +141,56 @@ function resolveCurrentDay() {
 
 function clampDay(day) {
   return Math.max(1, Math.min(day, 31));
+}
+
+function hydrateDoorsFromConfig(data) {
+  if (!data || !Array.isArray(data.doors)) {
+    console.error("Door config missing or malformed.");
+    return;
+  }
+
+  doorAccessConfig.allDoors = Boolean(data.ALL_DOORS);
+  doorAccessConfig.testDay = Number.isInteger(data.testDay)
+    ? clampDay(data.testDay)
+    : null;
+
+  doors = data.doors.map((cfg) => new Door(cfg, toys, doorSound, lockedSound));
+}
+
+function collectImagePayloads(config) {
+  if (!config || !Array.isArray(config.doors)) return [];
+  const unique = new Set();
+  for (const door of config.doors) {
+    const payload = door?.payload;
+    if (typeof payload !== "string") continue;
+    if (isVideoPayloadString(payload)) continue;
+    unique.add(payload);
+  }
+  return Array.from(unique);
+}
+
+function ensureToysLoadedFromConfig(config) {
+  const payloads = collectImagePayloads(config);
+  payloads.forEach((payload) => {
+    if (toys[payload]) return;
+    const assetPath = resolveToyImagePath(payload);
+    if (assetPath) {
+      toys[payload] = loadImage(assetPath);
+    }
+  });
+}
+
+function resolveToyImagePath(payload) {
+  if (!payload || isVideoPayloadString(payload)) return null;
+  if (payload.startsWith("assets/") || payload.startsWith("./assets/")) {
+    return payload;
+  }
+  // Default convention keeps existing short names working (e.g. "star" -> assets/toy_star.png).
+  return `assets/toy_${payload}.png`;
+}
+
+function isVideoPayloadString(payload) {
+  return typeof payload === "string" && payload.startsWith("mp4:");
 }
 
 /* -----------------------------------------------------------
