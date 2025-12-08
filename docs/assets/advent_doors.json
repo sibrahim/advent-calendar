@@ -84,7 +84,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.066,
-	"payload": "mp4:assets/bauble.mp4",
+	"payload": "bear",
       "animation": "double"
     },
     {
@@ -93,7 +93,7 @@
       "y": 0.52,
       "w": 0.054,
       "h": 0.06,
-	"payload": "bear",
+	"payload": "mp4:assets/snow-rabbit-small.mp4",
       "animation": "fall"
     },
     {
@@ -111,7 +111,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.06,
-      "payload": "reindeer",
+	"payload": "mp4:assets/bauble.mp4",
       "animation": "hinge"
     },
     {
@@ -129,7 +129,7 @@
       "y": 0.7,
       "w": 0.054,
       "h": 0.06,
-      "payload": "bear",
+	"payload": "reindeer",
       "animation": "double"
     },
     {
