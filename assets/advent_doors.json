@@ -30,7 +30,7 @@
       "y": 0.15,
       "w": 0.06,
       "h": 0.06,
-      "payload": "reindeer",
+      "payload": "star",
       "animation": "fold"
     },
     {
@@ -48,7 +48,7 @@
       "y": 0.32,
       "w": 0.06,
       "h": 0.06,
-      "payload": "star",
+	"payload": "mp4:assets/snowman-meal.mp4",
       "animation": "fall"
     },
     {
@@ -75,7 +75,7 @@
       "y": 0.32,
       "w": 0.06,
       "h": 0.06,
-      "payload": "star",
+      "payload": "mp4:assets/applecrumby-dog2.mp4",	
       "animation": "fold"
     },
     {
@@ -84,7 +84,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.066,
-      "payload": "bear",
+	"payload": "mp4:assets/bauble.mp4",
       "animation": "double"
     },
     {
@@ -93,7 +93,7 @@
       "y": 0.52,
       "w": 0.054,
       "h": 0.06,
-      "payload": "reindeer",
+	"payload": "bear",
       "animation": "fall"
     },
     {
@@ -111,7 +111,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.06,
-      "payload": "bear",
+      "payload": "reindeer",
       "animation": "hinge"
     },
     {
@@ -120,7 +120,7 @@
       "y": 0.69,
       "w": 0.06,
       "h": 0.06,
-      "payload": "reindeer",
+	"payload": "mp4:assets/train-trees.mp4",
       "animation": "fold"
     },
     {
@@ -147,7 +147,7 @@
       "y": 0.7,
       "w": 0.054,
       "h": 0.06,
-      "payload": "reindeer",
+	"payload": "mp4:assets/bart.mp4",
       "animation": "slide"
     },
     {
@@ -219,8 +219,8 @@
       "y": 0.44,
       "w": 0.06,
       "h": 0.06,
-      "payload": "bear",
-      "animation": "double"
+	"payload": "mp4:assets/tree-lighting-up.mp4",
+	"animation": "double"
     }
   ]
 }
