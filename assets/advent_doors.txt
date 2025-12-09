@@ -51,11 +51,11 @@ ok >>     toy-sled-small.png
 
       "id": 17,
       "payload": "star",
->>      toy-saucer-coconut-small.png
+ok >>      toy-saucer-coconut-small.png
 
       "id": 18,
       "payload": "bear",
->>     toy-bear-drawing-small.png
+ok >>     toy-bear-drawing-small.png
 
       "id": 19,
       "payload": "reindeer",
@@ -65,7 +65,7 @@ ok >>     toy-sled-small.png
 
       "id": 21,
       "payload": "bear",
->>     toy-duck-vintage-small-2
+ok>>     toy-duck-vintage-small-1
 
 
       "id": 22,

@@ -156,7 +156,7 @@
       "y": 0.83,
       "w": 0.06,
       "h": 0.066,
-      "payload": "star",
+      "payload": "assets/toy-saucer-coconut-small.png",
       "animation": "hinge"
     },
     {
@@ -165,7 +165,7 @@
       "y": 0.82,
       "w": 0.054,
       "h": 0.06,
-      "payload": "bear",
+      "payload": "assets/toy-bear-drawing-small.png",
       "animation": "fold"
     },
     {
@@ -192,7 +192,7 @@
       "y": 0.82,
       "w": 0.06,
       "h": 0.06,
-      "payload": "bear",
+      "payload": "assets/toy-duck-vintage-small-1.png",
       "animation": "slide"
     },
     {
