@@ -163,12 +163,23 @@ function playVideo(src, doorInstance) {
   container.appendChild(videoOverlayWrapper);
 
   const playPromise = videoElement.play();
-  if (playPromise && typeof playPromise.catch === "function") {
-    playPromise.catch(() => {
-      // Autoplay blocked; unmute and rely on user interaction
-      videoElement.muted = false;
-      videoElement.controls = true;
-    });
+  if (playPromise && typeof playPromise.then === "function") {
+    playPromise
+      .then(() => {
+        // Unmute after autoplay begins.
+        videoElement.muted = false;
+        videoElement.volume = 1;
+        if (videoElement.paused) {
+          videoElement.play().catch(() => {
+            videoElement.controls = true;
+          });
+        }
+      })
+      .catch(() => {
+        // Autoplay blocked; unmute and rely on user interaction
+        videoElement.muted = false;
+        videoElement.controls = true;
+      });
   }
 }
 
