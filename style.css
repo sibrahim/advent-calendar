@@ -54,12 +54,21 @@ canvas {
   justify-content: center;
   z-index: 30;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-  opacity: 0.92;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
 .video-close-btn:hover {
   background: rgba(0, 0, 0, 0.95);
   opacity: 1;
+}
+
+.video-overlay-wrapper:hover .video-close-btn,
+.video-overlay-wrapper:focus-within .video-close-btn,
+.video-close-btn:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .video-loading {
