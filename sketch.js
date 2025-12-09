@@ -12,6 +12,7 @@ let toys = {};
 let doorSound;
 let lockedSound;
 let videoElement = null;
+let videoOverlayWrapper = null;
 let doorConfig = null;
 let doorAccessConfig = {
   allDoors: false,
@@ -107,28 +108,79 @@ function mousePressed() {
 ----------------------------------------------------------- */
 
 function playVideo(src, doorInstance) {
-  if (videoElement) {
-    videoElement.remove();
-    videoElement = null;
-  }
+  teardownVideoOverlay();
 
   const container = document.getElementById("canvas-container");
+  videoOverlayWrapper = document.createElement("div");
+  videoOverlayWrapper.className = "video-overlay-wrapper";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "video-close-btn";
+  closeBtn.setAttribute("aria-label", "Close video");
+  closeBtn.textContent = "×";
+
+  const loading = document.createElement("div");
+  loading.className = "video-loading";
+  loading.textContent = "Loading…";
+
   videoElement = document.createElement("video");
   videoElement.src = src;
   videoElement.autoplay = true;
+  videoElement.muted = true; // allow autoplay on most browsers
   videoElement.controls = true;
+  videoElement.playsInline = true;
   videoElement.className = "video-overlay";
-  container.appendChild(videoElement);
+  videoElement.style.opacity = "0";
 
-  videoElement.onended = () => {
-    if (videoElement) {
-      videoElement.remove();
-      videoElement = null;
-    }
+  let cleaned = false;
+  const cleanUp = () => {
+    if (cleaned) return;
+    cleaned = true;
+    teardownVideoOverlay();
     if (doorInstance && typeof doorInstance.handleVideoFinished === "function") {
       doorInstance.handleVideoFinished();
     }
   };
+
+  closeBtn.onclick = cleanUp;
+
+  videoElement.onended = cleanUp;
+  videoElement.onerror = () => {
+    loading.textContent = "Unable to load video.";
+  };
+
+  const revealVideo = () => {
+    loading.remove();
+    videoElement.style.opacity = "1";
+  };
+
+  videoElement.addEventListener("loadeddata", revealVideo, { once: true });
+  videoElement.addEventListener("canplay", revealVideo, { once: true });
+
+  videoOverlayWrapper.appendChild(closeBtn);
+  videoOverlayWrapper.appendChild(videoElement);
+  videoOverlayWrapper.appendChild(loading);
+  container.appendChild(videoOverlayWrapper);
+
+  const playPromise = videoElement.play();
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(() => {
+      // Autoplay blocked; unmute and rely on user interaction
+      videoElement.muted = false;
+      videoElement.controls = true;
+    });
+  }
+}
+
+function teardownVideoOverlay() {
+  if (videoOverlayWrapper) {
+    videoOverlayWrapper.remove();
+    videoOverlayWrapper = null;
+  }
+  if (videoElement) {
+    videoElement.pause();
+    videoElement = null;
+  }
 }
 
 function resolveCurrentDay() {
