@@ -24,7 +24,7 @@
 
       "id": 9,
 	"payload": "bear",
->> toy-bear-fuzzy-small.png
+ok >> toy-bear-fuzzy-small.png
 
       "id": 10,
 	"payload": "mp4:assets/snow-rabbit-small.mp4",
@@ -70,11 +70,11 @@ ok>>     toy-duck-vintage-small-1
 
       "id": 22,
       "payload": "reindeer",
->> toy-manatee-small.png
+ok>> toy-manatee-small.png
 
       "id": 23,
       "payload": "star",
->> toy-saucer-small.png
+ok>> toy-saucer-small.png
 
       "id": 24,
 	"payload": "mp4:assets/tree-lighting-up.mp4",

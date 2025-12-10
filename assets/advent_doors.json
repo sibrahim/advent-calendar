@@ -84,7 +84,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.066,
-	"payload": "bear",
+	"payload": "assets/toy-bear-fuzzy-small.png",
       "animation": "double"
     },
     {
@@ -201,7 +201,7 @@
       "y": 0.82,
       "w": 0.06,
       "h": 0.06,
-      "payload": "reindeer",
+      "payload": "assets/toy-manatee-small.png",
       "animation": "hinge"
     },
     {
@@ -210,7 +210,7 @@
       "y": 0.63,
       "w": 0.066,
       "h": 0.066,
-      "payload": "star",
+      "payload": "assets/toy-saucer-small.png",
       "animation": "fold"
     },
     {
