@@ -30,7 +30,7 @@
       "y": 0.15,
       "w": 0.06,
       "h": 0.06,
-      "payload": "assets/toy_duck.png",
+      "payload": "star",
       "animation": "fold"
     },
     {
@@ -39,7 +39,7 @@
       "y": 0.16,
       "w": 0.054,
       "h": 0.06,
-      "payload": "mp4:assets/door4_video.mp4",
+      "payload": "assets/toy-saucer-small.png",
       "animation": "double"
     },
     {
@@ -48,7 +48,7 @@
       "y": 0.32,
       "w": 0.06,
       "h": 0.06,
-	"payload": "mp4:assets/snowman-meal.mp4",
+      "payload": "mp4:assets/snowman-meal.mp4",
       "animation": "fall"
     },
     {
@@ -57,7 +57,7 @@
       "y": 0.31,
       "w": 0.066,
       "h": 0.06,
-      "payload": "star",
+      "payload": "assets/toy-nutcracker-shadow-small.png",
       "animation": "slide"
     },
     {
@@ -75,7 +75,7 @@
       "y": 0.32,
       "w": 0.06,
       "h": 0.06,
-      "payload": "mp4:assets/applecrumby-dog2.mp4",	
+      "payload": "mp4:assets/applecrumby-dog2.mp4",
       "animation": "fold"
     },
     {
@@ -84,7 +84,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.066,
-	"payload": "assets/toy-bear-fuzzy-small.png",
+      "payload": "assets/toy-bear-fuzzy-small.png",
       "animation": "double"
     },
     {
@@ -93,7 +93,7 @@
       "y": 0.52,
       "w": 0.054,
       "h": 0.06,
-	"payload": "mp4:assets/snow-rabbit-small.mp4",
+      "payload": "mp4:assets/snow-rabbit-small.mp4",
       "animation": "fall"
     },
     {
@@ -102,7 +102,7 @@
       "y": 0.5,
       "w": 0.066,
       "h": 0.066,
-      "payload": "assets/toy-nutcracker-shadow-small.png",
+      "payload": "assets/toy_duck.png",
       "animation": "slide"
     },
     {
@@ -111,7 +111,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.06,
-	"payload": "mp4:assets/bauble.mp4",
+      "payload": "mp4:assets/bauble.mp4",
       "animation": "hinge"
     },
     {
@@ -120,7 +120,7 @@
       "y": 0.69,
       "w": 0.06,
       "h": 0.06,
-	"payload": "mp4:assets/train-trees.mp4",
+      "payload": "assets/toy-bear-drawing-small.png",
       "animation": "fold"
     },
     {
@@ -129,7 +129,7 @@
       "y": 0.7,
       "w": 0.054,
       "h": 0.06,
-	"payload": "reindeer",
+      "payload": "assets/toy-airplane-bear-small.png",
       "animation": "double"
     },
     {
@@ -138,7 +138,7 @@
       "y": 0.69,
       "w": 0.066,
       "h": 0.066,
-      "payload": "assets/toy-sled-small.png",
+      "payload": "assets/toy-manatee-small.png",
       "animation": "fall"
     },
     {
@@ -147,7 +147,7 @@
       "y": 0.7,
       "w": 0.054,
       "h": 0.06,
-	"payload": "mp4:assets/bart.mp4",
+      "payload": "bear",
       "animation": "slide"
     },
     {
@@ -156,7 +156,7 @@
       "y": 0.83,
       "w": 0.06,
       "h": 0.066,
-      "payload": "assets/toy-saucer-coconut-small.png",
+      "payload": "assets/toy-sled-small.png",
       "animation": "hinge"
     },
     {
@@ -165,7 +165,7 @@
       "y": 0.82,
       "w": 0.054,
       "h": 0.06,
-      "payload": "assets/toy-bear-drawing-small.png",
+      "payload": "mp4:assets/bart.mp4",
       "animation": "fold"
     },
     {
@@ -201,7 +201,7 @@
       "y": 0.82,
       "w": 0.06,
       "h": 0.06,
-      "payload": "assets/toy-manatee-small.png",
+      "payload": "mp4:assets/tree-lighting-up.mp4",
       "animation": "hinge"
     },
     {
@@ -210,7 +210,7 @@
       "y": 0.63,
       "w": 0.066,
       "h": 0.066,
-      "payload": "assets/toy-saucer-small.png",
+      "payload": "mp4:assets/train-trees.mp4",
       "animation": "fold"
     },
     {
@@ -219,8 +219,8 @@
       "y": 0.44,
       "w": 0.06,
       "h": 0.06,
-	"payload": "mp4:assets/tree-lighting-up.mp4",
-	"animation": "double"
+      "payload": "mp4:assets/door4_video.mp4",
+      "animation": "double"
     }
   ]
 }
