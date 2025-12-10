@@ -3,8 +3,8 @@
     "animationLegend": "slide | hinge | fold | fall | double",
     "doorAccess": "ALL_DOORS=true overrides the calendar; testDay (1-24) forces a specific day when ALL_DOORS=false."
   },
-  "ALL_DOORS": true,
-    "testDay": 10,
+  "ALL_DOORS": false,
+    "testDay": "",
   "doors": [
     {
       "id": 1,
