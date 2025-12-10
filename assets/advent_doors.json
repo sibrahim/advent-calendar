@@ -221,6 +221,16 @@
       "h": 0.06,
       "payload": "mp4:assets/door4_video.mp4",
       "animation": "double"
+    },
+    {
+      "id": 25,
+      "x": 0.55,
+      "y": 0.66,
+      "w": 0.06,
+      "h": 0.06,
+      "payload": "assets/greetings-small.png",
+      "animation": "transparent"
     }
   ]
 }
+

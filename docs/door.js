@@ -7,7 +7,14 @@
    - Toy bounce after opening + timed fade/reset
 ----------------------------------------------------------- */
 
-const DOOR_ANIMATIONS = new Set(["slide", "hinge", "fold", "fall", "double"]);
+const DOOR_ANIMATIONS = new Set([
+  "slide",
+  "hinge",
+  "fold",
+  "fall",
+  "double",
+  "transparent",
+]);
 const ANIM_STEP = 1 / 30;
 const RESET_DELAY_MS = 10000;
 const FADE_DURATION_MS = 2000;
@@ -97,6 +104,14 @@ class Door {
   }
 
   draw() {
+    if (this.isTransparent()) {
+      this.drawTransparentPanel();
+      if (this.state === "open" && !this.isVideoPayload()) {
+        this.drawToyBounce();
+      }
+      return;
+    }
+
     if (this.state === "closed") {
       this.drawClosedPanel();
     } else if (this.state === "opening" || this.state === "closing") {
@@ -258,6 +273,7 @@ class Door {
   }
 
   drawDoorNumber(x, y, w, h, placeBelow = false) {
+    if (this.isTransparent()) return;
     push();
     fill(190, 0, 20);
     noStroke();
@@ -310,6 +326,7 @@ class Door {
   }
 
   canOpen(currentDay) {
+    if (this.isTransparent()) return true;
     return currentDay >= this.unlockDay;
   }
 
@@ -338,6 +355,27 @@ class Door {
 
   isVideoPayload() {
     return this.payload && this.payload.startsWith("mp4:");
+  }
+
+  isTransparent() {
+    return this.animation === "transparent";
+  }
+
+  drawTransparentPanel() {
+    const x = this.px();
+    const y = this.py();
+    const w = this.pw();
+    const h = this.ph();
+    const hovered = this.isHit(mouseX, mouseY);
+    const showing = hovered || this.state !== "closed";
+    if (!showing) return;
+
+    push();
+    noFill();
+    stroke(255, 255, 255, hovered ? 200 : 140);
+    strokeWeight(3);
+    rect(x - 4, y - 4, w + 8, h + 8, 6);
+    pop();
   }
 }
 
