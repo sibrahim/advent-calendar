@@ -5,6 +5,14 @@
   },
   "ALL_DOORS": false,
     "testDay": "",
+  "credits": {
+    "enabled": true,
+    "text": "By Amit & Shahril. Plushies by Applecrumby",
+    "color": "#000000",
+    "fontSize": 24,
+    "x": 0.50,
+    "y": 0.98
+  },
   "doors": [
     {
       "id": 1,

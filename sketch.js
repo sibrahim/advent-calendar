@@ -18,6 +18,7 @@ let doorAccessConfig = {
   allDoors: false,
   testDay: null,
 };
+let creditsConfig = null;
 
 // Snow + animals
 let snowLayers = [];
@@ -77,6 +78,9 @@ function draw() {
   clear();
   image(bg, 0, 0, width, height);
 
+  // Draw credits on top of background
+  drawCredits();
+
   tAnim += 0.02;
 
   // Overlays
@@ -108,6 +112,41 @@ function resizeToViewport() {
     canvasEl.elt.style.setProperty("height", `${newH}px`);
   }
   rebuildSnowLayers();
+}
+
+/* -----------------------------------------------------------
+   Credits Text Display
+----------------------------------------------------------- */
+
+function drawCredits() {
+  if (!creditsConfig || !creditsConfig.enabled) return;
+  if (!creditsConfig.text) return;
+
+  push();
+
+  // Parse color (supports hex codes and CSS color names)
+  const colorValue = creditsConfig.color || "#000000";
+  fill(colorValue);
+  noStroke();
+
+  // Calculate font size scaled by canvas
+  const baseFontSize = creditsConfig.fontSize || 14;
+  const scaledFontSize = baseFontSize * canvasScale;
+  textSize(scaledFontSize);
+  textFont("Arial");
+  textStyle(NORMAL);
+
+  // Position as normalized coordinates (default: bottom right)
+  const xPos = (creditsConfig.x || 0.68) * width;
+  const yPos = (creditsConfig.y || 0.96) * height;
+
+  // Use LEFT, BOTTOM alignment for bottom-right positioning
+  textAlign(LEFT, BOTTOM);
+
+  // Draw the text
+  text(creditsConfig.text, xPos, yPos);
+
+  pop();
 }
 
 /* -----------------------------------------------------------
@@ -248,6 +287,9 @@ function hydrateDoorsFromConfig(data) {
   doorAccessConfig.testDay = Number.isInteger(data.testDay)
     ? clampDay(data.testDay)
     : null;
+
+  // Extract credits configuration
+  creditsConfig = data.credits || null;
 
   doors = data.doors.map((cfg) => new Door(cfg, toys, doorSound, lockedSound));
 }
