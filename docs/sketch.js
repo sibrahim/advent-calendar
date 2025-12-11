@@ -24,6 +24,7 @@ let snowLayers = [];
 let tAnim = 0;
 let canvasEl = null;
 let canvasScale = 1;
+const ENABLE_MICRO_ANIM = false;
 
 function preload() {
   const cacheBust = Date.now();
@@ -80,7 +81,9 @@ function draw() {
 
   // Overlays
   drawSnow();
-  drawAnimals();
+  if (ENABLE_MICRO_ANIM) {
+    drawAnimals();
+  }
 
   // Doors (drawn last, on top)
   for (let d of doors) {
