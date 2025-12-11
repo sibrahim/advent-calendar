@@ -196,12 +196,21 @@ function playVideo(src, doorInstance) {
   videoElement.controls = true;
   videoElement.playsInline = true;
   videoElement.className = "video-overlay";
+  videoElement.style.width = "auto";
+  videoElement.style.height = "auto";
+  videoElement.style.maxWidth = "95vw";
+  videoElement.style.maxHeight = "95vh";
+  videoElement.style.objectFit = "contain";
   videoElement.style.opacity = "0";
 
+  let handleResize = null;
   let cleaned = false;
-  const cleanUp = () => {
+  let cleanUp = () => {
     if (cleaned) return;
     cleaned = true;
+    if (handleResize) {
+      window.removeEventListener("resize", handleResize);
+    }
     teardownVideoOverlay();
     if (doorInstance && typeof doorInstance.handleVideoFinished === "function") {
       doorInstance.handleVideoFinished();
@@ -215,13 +224,44 @@ function playVideo(src, doorInstance) {
     loading.textContent = "Unable to load video.";
   };
 
+  const applyVideoFit = () => {
+    if (!videoElement) return;
+    const maxW = window.innerWidth * 0.95;
+    const maxH = window.innerHeight * 0.95;
+    const vw = videoElement.videoWidth || maxW;
+    const vh = videoElement.videoHeight || maxH;
+    if (vw <= 0 || vh <= 0) {
+      videoElement.style.width = `${maxW}px`;
+      videoElement.style.height = `${maxH}px`;
+      return;
+    }
+    const ratio = vw / vh;
+    let targetW = Math.min(maxW, maxH * ratio);
+    let targetH = targetW / ratio;
+    if (targetH > maxH) {
+      targetH = maxH;
+      targetW = targetH * ratio;
+    }
+    videoElement.style.maxWidth = `${maxW}px`;
+    videoElement.style.maxHeight = `${maxH}px`;
+    videoElement.style.width = `${targetW}px`;
+    videoElement.style.height = `${targetH}px`;
+  };
+
   const revealVideo = () => {
     loading.remove();
     videoElement.style.opacity = "1";
   };
 
-  videoElement.addEventListener("loadeddata", revealVideo, { once: true });
-  videoElement.addEventListener("canplay", revealVideo, { once: true });
+  const handleMetadata = () => {
+    applyVideoFit();
+    revealVideo();
+  };
+
+  handleResize = () => applyVideoFit();
+
+  videoElement.addEventListener("loadedmetadata", handleMetadata, { once: true });
+  window.addEventListener("resize", handleResize);
 
   videoOverlayWrapper.appendChild(closeBtn);
   videoOverlayWrapper.appendChild(videoElement);
@@ -247,6 +287,9 @@ function playVideo(src, doorInstance) {
         videoElement.controls = true;
       });
   }
+
+  // Initial fit in case metadata is slow
+  applyVideoFit();
 }
 
 function teardownVideoOverlay() {
