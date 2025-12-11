@@ -255,12 +255,18 @@ function playVideo(src, doorInstance) {
 
   const handleMetadata = () => {
     applyVideoFit();
+  };
+
+  const handleDataReady = () => {
+    applyVideoFit();
     revealVideo();
   };
 
   handleResize = () => applyVideoFit();
 
   videoElement.addEventListener("loadedmetadata", handleMetadata, { once: true });
+  videoElement.addEventListener("loadeddata", handleDataReady, { once: true });
+  videoElement.addEventListener("canplay", handleDataReady, { once: true });
   window.addEventListener("resize", handleResize);
 
   videoOverlayWrapper.appendChild(closeBtn);
