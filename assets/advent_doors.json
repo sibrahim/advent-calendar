@@ -65,7 +65,7 @@
       "y": 0.31,
       "w": 0.066,
       "h": 0.06,
-      "payload": "assets/toy-nutcracker-shadow-small.png",
+	"payload": "assets/toy-bear-fuzzy-small.png",
       "animation": "slide"
     },
     {
@@ -92,7 +92,7 @@
       "y": 0.51,
       "w": 0.06,
       "h": 0.066,
-      "payload": "assets/toy-bear-fuzzy-small.png",
+	"payload": "assets/toy-nutcracker-shadow-small.png",
       "animation": "double"
     },
     {
