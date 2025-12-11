@@ -22,6 +22,8 @@ let doorAccessConfig = {
 // Snow + animals
 let snowLayers = [];
 let tAnim = 0;
+let canvasEl = null;
+let canvasScale = 1;
 
 function preload() {
   const cacheBust = Date.now();
@@ -47,7 +49,10 @@ function preload() {
 
 function setup() {
   let c = createCanvas(bg.width, bg.height);
+  canvasEl = c;
   c.parent("canvas-container");
+  pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+  resizeToViewport();
 
   // Use config from preload; if it failed for any reason, fall back to a fetch.
   if (doorConfig) {
@@ -67,8 +72,9 @@ function setup() {
 function draw() {
   if (!bg) return;
 
-  // Draw background first
-  background(bg);
+  // Draw scaled background first
+  clear();
+  image(bg, 0, 0, width, height);
 
   tAnim += 0.02;
 
@@ -81,6 +87,24 @@ function draw() {
     d.update();
     d.draw();
   }
+}
+
+function windowResized() {
+  resizeToViewport();
+}
+
+function resizeToViewport() {
+  if (!bg) return;
+  const scale = Math.min(windowWidth / bg.width, windowHeight / bg.height);
+  canvasScale = scale;
+  const newW = Math.max(1, Math.round(bg.width * scale));
+  const newH = Math.max(1, Math.round(bg.height * scale));
+  resizeCanvas(newW, newH);
+  if (canvasEl && canvasEl.elt) {
+    canvasEl.elt.style.setProperty("width", `${newW}px`, "important");
+    canvasEl.elt.style.setProperty("height", `${newH}px`);
+  }
+  rebuildSnowLayers();
 }
 
 /* -----------------------------------------------------------
@@ -261,18 +285,7 @@ function isVideoPayloadString(payload) {
 ----------------------------------------------------------- */
 
 function initSnow() {
-  for (let layer = 0; layer < 3; layer++) {
-    let particles = [];
-    for (let i = 0; i < 200; i++) {
-      particles.push({
-        x: random(width),
-        y: random(height),
-        speed: random(0.4, 1.2) * (layer + 1),
-        size: random(2, 6 + layer),
-      });
-    }
-    snowLayers.push(particles);
-  }
+  rebuildSnowLayers();
 }
 
 function drawSnow() {
@@ -287,6 +300,28 @@ function drawSnow() {
         s.x = random(width);
       }
     }
+  }
+}
+
+function rebuildSnowLayers() {
+  snowLayers = [];
+  const baseCount = 200;
+  const scale = canvasScale || 1;
+  const count = Math.max(50, Math.round(baseCount * 4 * scale * scale));
+  const speedScale = 0.5 * scale; // slower by 50% and scaled with canvas
+  const sizeScale = Math.max(0.6, scale); // avoid vanishing on small canvases
+
+  for (let layer = 0; layer < 3; layer++) {
+    let particles = [];
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: random(width),
+        y: random(height),
+        speed: random(0.4, 1.2) * (layer + 1) * speedScale,
+        size: random(2, 6 + layer) * sizeScale,
+      });
+    }
+    snowLayers.push(particles);
   }
 }
 
